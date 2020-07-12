@@ -23,3 +23,8 @@ void Lane::input_xy(int x, int y)
     pixel_x.push_back(x);
     pixel_y.push_back(y);
 }
+
+int Lane::get_color()
+{
+    return color;
+}

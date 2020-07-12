@@ -18,6 +18,7 @@ class Lane
         Lane();
         void set_color(int color);
         void input_xy(int x, int y);
+        int get_color();
 };
 
 #endif

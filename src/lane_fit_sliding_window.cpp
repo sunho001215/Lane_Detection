@@ -73,11 +73,12 @@ void get_fits_by_sliding_window(cv::Mat img, int n_window = 10)
     int window_x_min, window_x_max;
     int window_y_min, window_y_max;
     int window_x_size, window_y_size;
+    int window_x_num = 3;
 
     window_x_size = 8;
     window_y_size = img_size/n_window;
 
-    cv::Mat left_temp_img = left_img.clone();
+    //cv::Mat left_temp_img = left_img.clone();
     //cv::namedWindow("left_lane");
 	//cv::imshow("left_lane", left_temp_img);
     //cv::waitKey();
@@ -85,23 +86,104 @@ void get_fits_by_sliding_window(cv::Mat img, int n_window = 10)
     //std::cout<<left_xbase<<std::endl;
     //std::cout<< window_x_size << " "<<window_y_size<<std::endl;
 
+    vector<int> temp_x;
+    vector<int> temp_y;
+
     for(int iter = 0; iter < n_window; iter++)
     {
+    //////////////////////////////////////////////////////
         window_x_min = left_xbase - ((3*window_x_size)/2);
         window_x_max = left_xbase + ((3*window_x_size)/2);
-        window_y_min = img_size - iter*window_y_size;
-        window_y_max = img_size - (iter+1)*window_y_size;
-        cv::rectangle(left_temp_img, cv::Rect(window_x_min, window_y_min, window_x_size, window_y_size), 50, 2);
-        imshow("left_temp_img",left_temp_img);
-        left_temp_img = left_img.clone();
-        cv::waitKey();
+        window_y_min = img_size - (iter+1)*window_y_size;
+        window_y_max = img_size - (iter)*window_y_size;
+        
+        for(int i = window_x_min; i < window_x_max; i++)
+        {
+            for(int j = window_y_min; j<window_y_max; j++)
+            {
+                if(left_lane.get_color() == 0)
+                {
+                    if(left_img.at<uchar>(j,i) == 128)
+                    {
+                        temp_x.push_back(i);
+                    }
+                }
+                else
+                {
+                    if(left_img.at<uchar>(j,i) == 255)
+                    {
+                        temp_x.push_back(i);
+                    }
+                }
+            }
+        }
+        
+        left_xbase = return_vector_xbase(temp_x);
+        
+        if(temp_x.size() > 10)
+        {
+            window_x_num = 3;
+            window_x_min = left_xbase - ((3*window_x_size)/2);
+            window_x_max = left_xbase + ((3*window_x_size)/2);
+            window_y_min = img_size - (iter+1)*window_y_size;
+            window_y_max = img_size - (iter)*window_y_size;
+        }
+        else
+        {
+            window_x_num = 5;
+            window_x_min = left_xbase - ((5*window_x_size)/2);
+            window_x_max = left_xbase + ((5*window_x_size)/2);
+            window_y_min = img_size - (iter+1)*window_y_size;
+            window_y_max = img_size - (iter)*window_y_size;
+        }
+        
+        temp_x.clear();
+    ///////////////////////////////////////////////////////
 
         for(int i = window_x_min; i < window_x_max; i++)
         {
             for(int j = window_y_min; j<window_y_max; j++)
             {
+                if(left_lane.get_color() == 0)
+                {
+                    if(left_img.at<uchar>(j,i) == 128)
+                    {
+                        left_lane.input_xy(i,j);
+                    }
+                }
+                else
+                {
+                    if(left_img.at<uchar>(j,i) == 255)
+                    {
+                        left_lane.input_xy(i,j);
+                    }
+                }
             }
         }
+
+        /*
+        if(window_x_num == 3)
+        {
+            cv::rectangle(left_temp_img, cv::Rect(window_x_min, window_y_min, window_x_size, window_y_size), 50, 2);
+            cv::rectangle(left_temp_img, cv::Rect(window_x_min + window_x_size, window_y_min, window_x_size, window_y_size), 50, 2);
+            cv::rectangle(left_temp_img, cv::Rect(window_x_min + 2*window_x_size, window_y_min, window_x_size, window_y_size), 50, 2);
+            imshow("left_temp_img",left_temp_img);
+            left_temp_img = left_img.clone();
+            cv::waitKey();
+        }
+        else if(window_x_num == 5)
+        {
+            cv::rectangle(left_temp_img, cv::Rect(window_x_min, window_y_min, window_x_size, window_y_size), 50, 2);
+            cv::rectangle(left_temp_img, cv::Rect(window_x_min + window_x_size, window_y_min, window_x_size, window_y_size), 50, 2);
+            cv::rectangle(left_temp_img, cv::Rect(window_x_min + 2*window_x_size, window_y_min, window_x_size, window_y_size), 50, 2);
+            cv::rectangle(left_temp_img, cv::Rect(window_x_min + 3*window_x_size, window_y_min, window_x_size, window_y_size), 50, 2);
+            cv::rectangle(left_temp_img, cv::Rect(window_x_min + 4*window_x_size, window_y_min, window_x_size, window_y_size), 50, 2);
+            imshow("left_temp_img",left_temp_img);
+            left_temp_img = left_img.clone();
+            cv::waitKey();
+        }*/
+
+        window_x_num = 3;
     }
 
     //right_img
@@ -132,4 +214,15 @@ int return_xbase(int *array, int size)
         }
     }
     return xbase;
+}
+
+int return_vector_xbase(vector<int> x)
+{
+    int size = x.size();
+    int sum = 0;
+    for(int i=0; i<size; i++)
+    {
+        sum += x[i];
+    }
+    return static_cast<int>(sum/size);
 }
