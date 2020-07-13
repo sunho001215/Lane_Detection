@@ -1,11 +1,13 @@
 #include "func_util.h"
 #include "lane_fit_sliding_window.h"
 #include "lane_class.h"
+#include <ctime>
 
 int main(void)
 {
+	int time = clock();
 	cv::Mat img;
-	img = cv::imread("test3.jpg");
+	img = cv::imread("test_images/straight_lines2.jpg");
 
 	if(img.empty())
 	{
@@ -39,7 +41,12 @@ int main(void)
 //	cv::namedWindow("lane_mask");
 //	cv::imshow("lane_mask", lane_mask);
 
-	get_fits_by_sliding_window(lane_mask, 10);
+	cv::Mat fitting_mask;
+	fitting_mask = get_fits_by_sliding_window(lane_mask, 10);
+	cv::namedWindow("fitting_mask");
+	cv::imshow("fitting_mask", fitting_mask);
+
+	std::cout << (clock() - time)/(double)CLOCKS_PER_SEC << std::endl;
 
 	cv::waitKey();
 	return 0;

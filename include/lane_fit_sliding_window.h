@@ -7,7 +7,7 @@
 using namespace std;
 
 int return_xbase(int *array, int size);
-void get_fits_by_sliding_window(cv::Mat img, int n_window);
+cv::Mat get_fits_by_sliding_window(cv::Mat img, int n_window);
 int hist_sum(int *array, int size);
 int return_vector_xbase(vector<int> x);
 
